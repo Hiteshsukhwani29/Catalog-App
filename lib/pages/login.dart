@@ -12,13 +12,28 @@ class _LoginState extends State<Login> {
   var name = "";
   bool changebtn = false;
 
+  final _formKey = GlobalKey<FormState>();
+
+  moveToHome(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        changebtn = true;
+      });
+      await Future.delayed(Duration(seconds: 1));
+      await Navigator.pushNamed(context, MyRoutes.HomeRoute);
+      setState(() {
+        changebtn = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
         color: Colors.white,
         child: Column(
           children: [
-            Image.asset("assets/images/login_img.png"),
+            Image.asset("assets/images/welcome.png"),
             SizedBox(height: 10),
             Text("Welcome $name",
                 style: TextStyle(
@@ -28,52 +43,58 @@ class _LoginState extends State<Login> {
             Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 20.0, horizontal: 80.0),
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(
-                        hintText: "Enter Username", labelText: "Username"),
-                    onChanged: (value) {
-                      name = value;
-                      setState(() {});
-                    },
-                  ),
-                  TextFormField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                        hintText: "Enter Password", labelText: "Password"),
-                  ),
-                  SizedBox(height: 30),
-                  InkWell(
-                    onTap: () async {
-                      setState((){
-                        changebtn = true;
-                      });
-                      await Future.delayed(Duration(seconds:1));
-                      Navigator.pushNamed(context, MyRoutes.HomeRoute);
-                    },
-                    child: AnimatedContainer(
-                      width: changebtn?50:160,
-                      height: 50,
-                      duration: Duration(seconds: 1),
-                      child: changebtn?Icon(Icons.done, color: Colors.white):Text("Sign In",style: TextStyle(color: Colors.white, fontSize: 18)),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.deepPurple,
-                        borderRadius: BorderRadius.circular(changebtn?25:8)
-                      ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      decoration: InputDecoration(
+                          hintText: "Enter Username", labelText: "Username"),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter a valid username";
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        name = value;
+                        setState(() {});
+                      },
                     ),
-                  )
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     Navigator.pushNamed(context, MyRoutes.HomeRoute);
-                  //   },
-                  //   child: Text("Sign In"),
-                  //   style: TextButton.styleFrom(
-                  //       minimumSize: Size(160, 50),
-                  //       backgroundColor: Colors.deepPurple),
-                  // ),
-                ],
+                    TextFormField(
+                      obscureText: true,
+                      decoration: InputDecoration(
+                          hintText: "Enter Password", labelText: "Password"),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter a valid password";
+                        } else if (value!.length < 6) {
+                          return "Password cannot be less then 6 characters";
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 30),
+                    Material(
+                      borderRadius: BorderRadius.circular(changebtn ? 25 : 8),
+                      color: Colors.deepPurple,
+                      child: InkWell(
+                        onTap: () => moveToHome(context),
+                        child: AnimatedContainer(
+                          width: changebtn ? 50 : 160,
+                          height: 50,
+                          duration: Duration(seconds: 1),
+                          child: changebtn
+                              ? Icon(Icons.done, color: Colors.white)
+                              : Text("Sign In",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 18)),
+                          alignment: Alignment.center,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             )
           ],
